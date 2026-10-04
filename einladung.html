@@ -1,0 +1,301 @@
+<title>Geburtstagseinladung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Outfit:wght@400;500;700&family=DM+Mono:wght@500&display=swap">
+<style>
+  /* Layout: eine Eintrittskarte ("Ticket") mit Abriss-Abschnitt für die Zusage, auf sonnigem Grund */
+  :root {
+    --ground: #FFD23F;
+    --paper: #FFFDF7;
+    --ink: #1B2A4A;
+    --ink-soft: #55607A;
+    --pink: #E83F6F;
+    --teal: #1FA595;
+    --line: #E6DFCC;
+    --font-display: "Bagel Fat One", "Arial Rounded MT Bold", system-ui, sans-serif;
+    --font-body: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font: 16px/1.55 var(--font-body);
+    padding-inline: 16px;
+    padding-block: 40px 56px;
+    min-height: 100%;
+  }
+  #confetti { position: fixed; inset: 0; pointer-events: none; width: 100%; height: 100%; }
+
+  .ticket {
+    position: relative;
+    max-width: 560px;
+    margin-inline: auto;
+    background: var(--paper);
+    border-radius: 18px;
+    box-shadow: 0 2px 0 var(--ink), 0 18px 40px rgba(27, 42, 74, .18);
+  }
+  .main { padding: 36px 32px 28px; display: grid; gap: 22px; }
+  .eyebrow {
+    font: 500 12px/1 var(--font-mono);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--pink);
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  h1 {
+    font: 400 clamp(40px, 11vw, 64px)/0.95 var(--font-display);
+    margin: 0;
+    text-wrap: balance;
+  }
+  h1 .age { color: var(--pink); display: block; }
+  .intro { margin: 0; color: var(--ink-soft); max-width: 46ch; }
+
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin: 0; }
+  .fact { display: grid; gap: 2px; min-width: 0; }
+  .fact dt { font: 500 11px/1.4 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+  .fact dd { margin: 0; font-weight: 700; font-size: 18px; overflow-wrap: anywhere; }
+  .fact dd small { display: block; font-weight: 400; font-size: 14px; color: var(--ink-soft); }
+  .maplink { color: var(--teal); font-weight: 500; font-size: 14px; }
+
+  .countdown { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cd { background: var(--ink); color: var(--paper); border-radius: 10px; padding: 8px 12px; min-width: 64px; text-align: center; }
+  .cd b { display: block; font: 500 24px/1.1 var(--font-mono); font-variant-numeric: tabular-nums; }
+  .cd span { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
+  .cd-done { font-weight: 700; color: var(--teal); }
+
+  /* Perforation zwischen Karte und Abriss */
+  .perf { position: relative; height: 0; border-top: 2px dashed var(--line); margin-inline: 20px; }
+  .perf::before, .perf::after {
+    content: ""; position: absolute; top: -15px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--ground);
+  }
+  .perf::before { left: -35px; }
+  .perf::after { right: -35px; }
+
+  .stub { padding: 26px 32px 32px; display: grid; gap: 16px; }
+  .stub h2 { margin: 0; font: 400 26px/1.1 var(--font-display); }
+  .stub p { margin: 0; color: var(--ink-soft); font-size: 15px; }
+  label { font-weight: 500; font-size: 14px; display: grid; gap: 6px; }
+  input[type="text"], textarea {
+    font: inherit; color: var(--ink); background: #fff;
+    border: 2px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%;
+  }
+  textarea { resize: vertical; min-height: 64px; }
+  input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+  .choice { display: flex; gap: 10px; flex-wrap: wrap; border: 0; padding: 0; margin: 0; }
+  .choice legend { font-weight: 500; font-size: 14px; margin-bottom: 6px; }
+  .choice input { position: absolute; opacity: 0; pointer-events: none; }
+  .choice label {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    border: 2px solid var(--ink); border-radius: 999px; padding: 8px 16px; font-weight: 700;
+  }
+  .choice input:checked + label { background: var(--ink); color: var(--paper); }
+  .choice input:focus-visible + label { outline: 3px solid var(--teal); outline-offset: 2px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .btn {
+    font: 700 16px/1 var(--font-body); border: 0; border-radius: 999px; padding: 13px 20px; cursor: pointer;
+    background: var(--pink); color: #fff; text-decoration: none; display: inline-block;
+  }
+  .btn.alt { background: transparent; color: var(--ink); border: 2px solid var(--ink); padding: 11px 18px; }
+  .msg { background: #fff; border: 2px dashed var(--line); border-radius: 10px; padding: 12px; font-size: 15px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .status { font-size: 14px; color: var(--teal); font-weight: 500; min-height: 1.4em; }
+  .contact { font-family: var(--font-mono); font-size: 15px; user-select: all; }
+
+  @media (max-width: 420px) {
+    .main { padding: 28px 20px 22px; }
+    .stub { padding: 22px 20px 26px; }
+  }
+</style>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<article class="ticket">
+  <section class="main">
+    <div class="eyebrow"><span>Einladung</span><span id="ticket-no">Ticket Nr. 001</span></div>
+    <h1><span id="t-name">Max</span> wird <span class="age" id="t-age">30!</span></h1>
+    <p class="intro" id="t-intro">Ich feiere meinen Geburtstag und hätte dich sehr gern dabei. Es gibt Essen, Musik und gute Laune.</p>
+
+    <dl class="facts">
+      <div class="fact"><dt>Wann</dt><dd id="t-date">–</dd></div>
+      <div class="fact"><dt>Uhrzeit</dt><dd id="t-time">–</dd></div>
+      <div class="fact"><dt>Wo</dt><dd id="t-place">–</dd></div>
+      <div class="fact"><dt>Dresscode</dt><dd id="t-dress">–</dd></div>
+    </dl>
+
+    <div class="countdown" id="countdown" aria-live="polite"></div>
+  </section>
+
+  <div class="perf" role="presentation"></div>
+
+  <section class="stub" aria-labelledby="rsvp-title">
+    <h2 id="rsvp-title">Kommst du?</h2>
+    <p id="t-deadline">Bitte gib bis zum Datum unten Bescheid.</p>
+
+    <form id="rsvp" novalidate>
+      <div style="display:grid;gap:14px">
+        <label for="guest">Dein Name
+          <input type="text" id="guest" name="guest" autocomplete="name" placeholder="z. B. Lena" required>
+        </label>
+        <fieldset class="choice">
+          <legend>Deine Antwort</legend>
+          <input type="radio" id="ans-yes" name="answer" value="yes" checked><label for="ans-yes">Ich komme</label>
+          <input type="radio" id="ans-no" name="answer" value="no"><label for="ans-no">Leider nicht</label>
+        </fieldset>
+        <label for="count">Wie viele Personen (mit dir)?
+          <input type="text" id="count" name="count" inputmode="numeric" value="1">
+        </label>
+        <label for="note">Nachricht (optional)
+          <textarea id="note" name="note" placeholder="Allergien, Musikwunsch, Grüße …"></textarea>
+        </label>
+        <div class="row">
+          <button type="submit" class="btn">Antwort erstellen</button>
+        </div>
+      </div>
+    </form>
+
+    <div id="result" hidden style="display:grid;gap:12px">
+      <div class="msg" id="msg"></div>
+      <div class="row">
+        <a class="btn" id="wa" href="#" target="_blank" rel="noopener">Per WhatsApp senden</a>
+        <button type="button" class="btn alt" id="copy">Text kopieren</button>
+      </div>
+      <p class="status" id="status"></p>
+      <p>Oder schick die Antwort direkt an: <span class="contact" id="t-contact"></span></p>
+    </div>
+  </section>
+</article>
+
+<script>
+  /* ============================================================
+     HIER DEINE DATEN EINTRAGEN
+     ============================================================ */
+  const PARTY = {
+    name: "Max",                       // Wer hat Geburtstag?
+    age: 30,                           // Wie alt? (oder null, wenn nicht anzeigen)
+    intro: "Ich feiere meinen Geburtstag und hätte dich sehr gern dabei. Es gibt Essen, Musik und gute Laune.",
+    start: "2026-11-14T19:00",         // Datum + Uhrzeit (JJJJ-MM-TTThh:mm)
+    end: "open end",                   // Ende, z. B. "23:00" oder "open end"
+    place: "Musterstraße 12",          // Adresse
+    city: "12345 Musterstadt",
+    dresscode: "Bequem & bunt",
+    rsvpBy: "2026-11-01",              // Zusage bis
+    phone: "491701234567",             // Deine WhatsApp-Nummer, nur Ziffern mit Ländervorwahl (49 = Deutschland)
+    phoneShown: "+49 170 1234567"      // So wird die Nummer angezeigt
+  };
+  /* ============================================================ */
+
+  const $ = (id) => document.getElementById(id);
+  const start = new Date(PARTY.start);
+  const dateFmt = new Intl.DateTimeFormat("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const timeFmt = new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit" });
+
+  document.title = "Einladung: " + PARTY.name + "s Geburtstag";
+  $("t-name").textContent = PARTY.name;
+  $("t-age").textContent = PARTY.age ? PARTY.age + "!" : "ein Jahr älter!";
+  $("t-intro").textContent = PARTY.intro;
+  $("t-date").textContent = dateFmt.format(start);
+  $("t-time").innerHTML = "";
+  $("t-time").append(timeFmt.format(start) + " Uhr");
+  const endEl = document.createElement("small");
+  endEl.textContent = "bis " + PARTY.end;
+  $("t-time").append(endEl);
+  $("t-place").textContent = PARTY.place;
+  const cityEl = document.createElement("small");
+  cityEl.textContent = PARTY.city;
+  const map = document.createElement("a");
+  map.className = "maplink";
+  map.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(PARTY.place + ", " + PARTY.city);
+  map.target = "_blank"; map.rel = "noopener";
+  map.textContent = "Auf der Karte zeigen";
+  $("t-place").append(cityEl, map);
+  $("t-dress").textContent = PARTY.dresscode;
+  $("t-deadline").textContent = "Bitte gib mir bis " + new Intl.DateTimeFormat("de-DE", { day: "numeric", month: "long" }).format(new Date(PARTY.rsvpBy)) + " Bescheid.";
+  $("t-contact").textContent = PARTY.phoneShown;
+  $("ticket-no").textContent = "Ticket Nr. " + String(start.getDate()).padStart(2, "0") + String(start.getMonth() + 1).padStart(2, "0");
+
+  // Countdown
+  function tick() {
+    const diff = start - new Date();
+    const box = $("countdown");
+    if (diff <= 0) { box.innerHTML = '<p class="cd-done">Die Party läuft! 🎉</p>'; return; }
+    const parts = [
+      [Math.floor(diff / 864e5), "Tage"],
+      [Math.floor(diff / 36e5) % 24, "Std"],
+      [Math.floor(diff / 6e4) % 60, "Min"],
+      [Math.floor(diff / 1e3) % 60, "Sek"]
+    ];
+    box.innerHTML = parts.map(([n, l]) => `<div class="cd"><b>${String(n).padStart(2, "0")}</b><span>${l}</span></div>`).join("");
+  }
+  tick(); setInterval(tick, 1000);
+
+  // Zusage
+  function buildMessage() {
+    const name = $("guest").value.trim();
+    const yes = document.querySelector('input[name="answer"]:checked').value === "yes";
+    const count = parseInt($("count").value, 10) || 1;
+    const note = $("note").value.trim();
+    let text = yes
+      ? `Hallo ${PARTY.name}, ich komme gern zu deinem Geburtstag am ${dateFmt.format(start)}!` + (count > 1 ? ` Wir sind ${count} Personen.` : "")
+      : `Hallo ${PARTY.name}, leider kann ich zu deinem Geburtstag am ${dateFmt.format(start)} nicht kommen. Ich wünsche dir eine tolle Feier!`;
+    if (note) text += `\n\n${note}`;
+    text += `\n\nViele Grüße, ${name}`;
+    return text;
+  }
+  $("ans-no").addEventListener("change", () => { $("count").disabled = true; });
+  $("ans-yes").addEventListener("change", () => { $("count").disabled = false; });
+
+  $("rsvp").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!$("guest").value.trim()) { $("guest").focus(); $("guest").placeholder = "Bitte gib deinen Namen ein"; return; }
+    const text = buildMessage();
+    $("msg").textContent = text;
+    $("wa").href = "https://wa.me/" + PARTY.phone + "?text=" + encodeURIComponent(text);
+    $("status").textContent = "";
+    $("result").hidden = false;
+    $("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    try { localStorage.setItem("rsvp-name", $("guest").value.trim()); } catch (_) {}
+  });
+
+  $("copy").addEventListener("click", () => {
+    const text = $("msg").textContent;
+    navigator.clipboard.writeText(text).then(
+      () => { $("status").textContent = "Text kopiert. Füge ihn in deine Nachricht ein."; },
+      () => {
+        const r = document.createRange(); r.selectNodeContents($("msg"));
+        const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+        $("status").textContent = "Text markiert. Kopiere ihn mit Strg+C oder lange drücken.";
+      }
+    );
+  });
+
+  try { const n = localStorage.getItem("rsvp-name"); if (n) $("guest").value = n; } catch (_) {}
+
+  // Konfetti beim Öffnen (kurz, nicht bei reduzierter Bewegung)
+  (function confetti() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const c = $("confetti"), ctx = c.getContext("2d");
+    const colors = ["#E83F6F", "#1FA595", "#1B2A4A", "#FFFDF7"];
+    let w, h; const resize = () => { w = c.width = innerWidth; h = c.height = innerHeight; };
+    resize(); addEventListener("resize", resize);
+    const bits = Array.from({ length: 120 }, () => ({
+      x: Math.random() * w, y: -20 - Math.random() * h * 0.6,
+      vx: (Math.random() - .5) * 1.6, vy: 2 + Math.random() * 3,
+      s: 6 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .2,
+      c: colors[Math.floor(Math.random() * colors.length)]
+    }));
+    const t0 = performance.now();
+    (function frame(t) {
+      ctx.clearRect(0, 0, w, h);
+      let alive = false;
+      for (const b of bits) {
+        b.x += b.vx; b.y += b.vy; b.r += b.vr;
+        if (b.y < h + 20) alive = true;
+        ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.r);
+        ctx.fillStyle = b.c; ctx.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2); ctx.restore();
+      }
+      if (alive && t - t0 < 6000) requestAnimationFrame(frame); else ctx.clearRect(0, 0, w, h);
+    })(t0);
+  })();
+</script>
